@@ -13,6 +13,7 @@ import { formatDateTime, statusText, formatDate } from '../utils/format';
 import { exportAttendancePDF, openPrintView } from '../utils/pdfExport';
 import { exportAttendanceExcel } from '../utils/excelExport';
 import { exportAttendanceCSV } from '../utils/csvExport';
+import { isNative } from '../utils/fileSave';
 
 export default function Reports() {
   const { push } = useToast();
@@ -208,7 +209,7 @@ export default function Reports() {
           signatureHeight: profile?.signatureHeight || 0,
           fileName: `${fileNameBase}.pdf`,
         });
-        push('PDF exported.', 'success');
+        push(isNative() ? 'PDF saved to Download/ClassTrack.' : 'PDF exported.', 'success');
       } else if (type === 'excel') {
         const summaryRows = displayRows.map((r) => ({
           ...r,
@@ -221,9 +222,13 @@ export default function Reports() {
         });
         push('Excel exported.', 'success');
       } else if (type === 'csv') {
-        exportAttendanceCSV(recordRows, `Attendance_Records.csv`);
-        push('CSV exported.', 'success');
+        await exportAttendanceCSV(recordRows, `Attendance_Records.csv`);
+        push(isNative() ? 'CSV saved to Download/ClassTrack.' : 'CSV exported.', 'success');
       } else if (type === 'print') {
+        if (isNative()) {
+          push('Print is not available in the app. Use "Export PDF" instead.', 'warning');
+          return;
+        }
         const totals = {
           students: report.total.students ?? rows.length,
           sessionDates: report.total.sessionDates ?? new Set(filteredRecords.map((r) => r.date)).size,

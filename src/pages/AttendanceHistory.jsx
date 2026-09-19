@@ -72,12 +72,12 @@ export default function AttendanceHistory() {
       .sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id));
   }, [records, studentById, classById, filterClass, filterStudent, filterStatus, dateFrom, dateTo]);
 
-  const exportCSV = () => {
+  const exportCSV = async () => {
     if (!filtered.length) {
       push('No records to export.', 'warning');
       return;
     }
-    exportAttendanceCSV(
+    await exportAttendanceCSV(
       filtered.map((r) => ({
         studentNumber: r.studentNumber,
         studentName: r.studentName,

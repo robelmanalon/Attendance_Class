@@ -16,6 +16,7 @@ import EmptyState from '../components/EmptyState';
 import { useToast } from '../components/Toast';
 import { formatDate } from '../utils/format';
 import { exportStudentMasterlistPDF } from '../utils/pdfExport';
+import { isNative } from '../utils/fileSave';
 import { IconPlus, IconDownload, IconUpload } from '../components/icons';
 
 const emptyForm = { studentNumber: '', fullName: '', email: '', status: 'active' };
@@ -174,7 +175,7 @@ export default function Students() {
         meta,
         fileName: `Student_Masterlist_${safe(cls?.section)}.pdf`,
       });
-      push('Student masterlist exported.', 'success');
+      push(isNative() ? 'PDF saved to Download/ClassTrack.' : 'Student masterlist exported.', 'success');
     } catch (err) {
       console.error(err);
       push(err.message || 'Export failed.', 'error');

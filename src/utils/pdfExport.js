@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatDate } from './format';
+import { saveBlob } from './fileSave';
 
 const STATUS_COLORS = {
   present: { fill: [74, 222, 128], text: [6, 78, 59] },
@@ -284,7 +285,7 @@ export async function exportAttendancePDF({
   doc.setTextColor(148, 163, 184);
   doc.text(text, margin, finalY);
 
-  doc.save(fileName);
+  await saveBlob(doc.output('blob'), fileName);
   return fileName;
 }
 
@@ -371,7 +372,7 @@ export async function exportStudentMasterlistPDF({
   doc.setTextColor(148, 163, 184);
   doc.text(text, margin, finalY);
 
-  doc.save(fileName);
+  await saveBlob(doc.output('blob'), fileName);
   return fileName;
 }
 

@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper: check that the request is authenticated.
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Helper: verify ownership by matching resource's teacherId with the requester.
+    function ownedBy(resource) {
+      return resource.data.teacherId == request.auth.uid;
+    }
+
+    // Helper: verify that an incoming document belongs to the requester.
+    function willOwn() {
+      return request.resource.data.teacherId == request.auth.uid;
+    }
+
+    // ---------------- users ----------------
+    match /users/{userId} {
+      // A user may create their own profile doc (on registration).
+      allow read: if signedIn() && (request.auth.uid == userId || resource.data.email == request.auth.token.email);
+      allow create: if signedIn() && request.auth.uid == userId && request.resource.data.email == request.auth.token.email;
+      allow update, delete: if signedIn() && request.auth.uid == userId;
+    }
+
+    // ---------------- classes ----------------
+    match /classes/{classId} {
+      // Teachers may only read/create/update/delete their own classes.
+      allow read: if signedIn() && ownedBy(resource);
+      allow create: if signedIn() && willOwn();
+      allow update: if signedIn() && willOwn() && ownedBy(resource);
+      allow delete: if signedIn() && ownedBy(resource);
+    }
+
+    // ---------------- students ----------------
+    match /students/{studentId} {
+      allow read: if signedIn() && ownedBy(resource);
+      allow create: if signedIn() && willOwn();
+      allow update: if signedIn() && willOwn() && ownedBy(resource);
+      allow delete: if signedIn() && ownedBy(resource);
+    }
+
+    // ---------------- attendance ----------------
+    match /attendance/{attendanceId} {
+      allow read: if signedIn() && ownedBy(resource);
+      allow create: if signedIn() && willOwn();
+      allow update: if signedIn() && willOwn() && ownedBy(resource);
+      allow delete: if signedIn() && ownedBy(resource);
+    }
+  }
+}

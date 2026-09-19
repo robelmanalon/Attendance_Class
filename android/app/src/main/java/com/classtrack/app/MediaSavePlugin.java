@@ -33,7 +33,7 @@ public class MediaSavePlugin extends Plugin {
             ret.put("uri", uri);
             call.resolve(ret);
         } catch (Exception ex) {
-            call.reject(ex.getMessage(), ex);
+            call.reject(ex.getMessage(), null, ex);
         }
     }
 }

@@ -1,0 +1,3 @@
+# Keep the gradlew shell script with LF line endings and an executable bit,
+# otherwise GitHub Actions (Linux runner) cannot run it.
+android/gradlew text eol=lf

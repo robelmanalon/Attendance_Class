@@ -175,7 +175,7 @@ export default function Students() {
         meta,
         fileName: `Student_Masterlist_${safe(cls?.section)}.pdf`,
       });
-      push(isNative() ? 'PDF saved to Download/ClassTrack.' : 'Student masterlist exported.', 'success');
+      push(isNative() ? 'PDF saved to Download folder.' : 'Student masterlist exported.', 'success');
     } catch (err) {
       console.error(err);
       push(err.message || 'Export failed.', 'error');

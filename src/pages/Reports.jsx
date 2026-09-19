@@ -209,7 +209,7 @@ export default function Reports() {
           signatureHeight: profile?.signatureHeight || 0,
           fileName: `${fileNameBase}.pdf`,
         });
-        push(isNative() ? 'PDF saved to Download/ClassTrack.' : 'PDF exported.', 'success');
+        push(isNative() ? 'PDF saved to Download folder.' : 'PDF exported.', 'success');
       } else if (type === 'excel') {
         const summaryRows = displayRows.map((r) => ({
           ...r,
@@ -223,7 +223,7 @@ export default function Reports() {
         push('Excel exported.', 'success');
       } else if (type === 'csv') {
         await exportAttendanceCSV(recordRows, `Attendance_Records.csv`);
-        push(isNative() ? 'CSV saved to Download/ClassTrack.' : 'CSV exported.', 'success');
+        push(isNative() ? 'CSV saved to Download folder.' : 'CSV exported.', 'success');
       } else if (type === 'print') {
         if (isNative()) {
           push('Print is not available in the app. Use "Export PDF" instead.', 'warning');

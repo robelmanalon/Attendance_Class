@@ -17,11 +17,13 @@ function blobToBase64(blob) {
 /**
  * Save a file either natively (Android/iOS app -> Download folder) or via
  * browser download (web). Returns the destination summary.
+ * Note: Android public directories (Downloads) don't support sub-folders, so
+ * files are written straight into the Download folder.
  */
 export async function saveBlob(blob, fileName) {
   if (Capacitor.isNativePlatform()) {
     const directory = Directory.Downloads;
-    const path = `ClassTrack/${fileName}`;
+    const path = fileName;
     await Filesystem.writeFile({
       path,
       data: await blobToBase64(blob),
@@ -29,7 +31,7 @@ export async function saveBlob(blob, fileName) {
       recursive: true,
     });
     const { uri } = await Filesystem.getUri({ directory, path });
-    return { source: 'native', location: `Download/ClassTrack/${fileName}`, uri };
+    return { source: 'native', location: `Download/${fileName}`, uri };
   }
 
   const url = URL.createObjectURL(blob);

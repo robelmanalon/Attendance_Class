@@ -1,5 +1,7 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
+
+const MediaSave = registerPlugin('MediaSave');
 
 export function isNative() {
   return Capacitor.isNativePlatform();
@@ -14,14 +16,36 @@ function blobToBase64(blob) {
   });
 }
 
+function mimeOf(blob, fileName) {
+  if (blob && blob.type) return blob.type;
+  const ext = String(fileName).split('.').pop().toLowerCase();
+  if (ext === 'pdf') return 'application/pdf';
+  if (ext === 'csv') return 'text/csv';
+  if (ext === 'xlsx') return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  return 'application/octet-stream';
+}
+
 /**
  * Save a file either natively (Android/iOS app -> Download folder) or via
  * browser download (web). Returns the destination summary.
- * Note: Android public directories (Downloads) don't support sub-folders, so
- * files are written straight into the Download folder.
+ *
+ * On Android this writes through the MediaStore Downloads collection (the same
+ * mechanism Chrome and DownloadManager use), so the file lands in the public
+ * "Download" folder even on Android 10+ scoped storage. The Capacitor
+ * Filesystem plugin can't do that (it writes raw file paths that are blocked
+ * on Android 11+), so we only fall back to it when MediaSave is unavailable.
  */
 export async function saveBlob(blob, fileName) {
   if (Capacitor.isNativePlatform()) {
+    if (Capacitor.getPlatform() === 'android' && Capacitor.isPluginAvailable('MediaSave')) {
+      await MediaSave.saveToDownloads({
+        fileName,
+        mimeType: mimeOf(blob, fileName),
+        data: await blobToBase64(blob),
+      });
+      return { source: 'native', location: `Download/${fileName}` };
+    }
+
     const directory = Directory.Downloads;
     const path = fileName;
     await Filesystem.writeFile({
